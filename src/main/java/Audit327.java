@@ -1,6 +1,5 @@
-import Config.Constants;
-import Data.BillData;
-import Data.Data;
+import config.constants;
+import domian.ExpectBill;
 import Util.*;
 
 import java.io.File;
@@ -16,11 +15,13 @@ public class Audit327 {
     public static void Audit327(int excelSize) throws FileNotFoundException, IOException, NoSuchAlgorithmException {
         //3.2.7对账单
         //日期格式
-        SimpleDateFormat sdt = new SimpleDateFormat("yyyyMMdd");
+
+        SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         //一个Excel包含的文件数量
         //命名数据
         String billName = "收账单对账数据";//文件类型 Tran\Alloc\BankFlow\TranAuditResult
-        String tranTime = sdt.format(new Date());//当前时间
+        String tranTime = sdf.format(new Date());//当前时间
 
         //文件地址
         String zipPath = "./src/";
@@ -37,7 +38,7 @@ public class Audit327 {
         String zipName = billName + "_" + tranTime;
         String soleId = "";
         //生成的Excel
-        List<BillData> info = new ArrayList<BillData>();
+        List<ExpectBill> info = new ArrayList<ExpectBill>();
 
         //工具类的创建
         ExcelUtil excel = new ExcelUtil();
@@ -46,119 +47,63 @@ public class Audit327 {
         NoticeUtil notice = new NoticeUtil();
         FtpUtil ftp = new FtpUtil();
 
-        //测试数据
-        BillData test1 = new BillData();
-        test1.setOrgCode("ORG001");
-        test1.setMerchantNo("MCH2023001");
-        test1.setMerchantOrderNo("ORD20231116001");
-        test1.setChannelSerialNo("CS20231116001");
-        test1.setBaoRongSerialNo("BR20231116001");
-        test1.setThirdPartySerialNo("20231116200000000001");
-        test1.setChannelName("易企收");
-        test1.setTradeDirection("收入");
-        test1.setTradeDate("2023-11-16");
-        test1.setSettleDate("2023-11-17");
-        test1.setTradeAmount("100.00");
-        test1.setFee("0.60");
-        test1.setPayMethod("支付宝");
-        test1.setTerminalId("T001");
-        test1.setSplitFlag("不分账");
-        test1.setMerchantDiscount("5.00");
-        test1.setPlatformDiscount("2.00");
-        test1.setChannelDiscount("1.00");
-        test1.setCounterpartyAccountNew("alipay_user_123");
-        test1.setCounterpartyNameNew("张三");
-        test1.setCallbackUrl("http://10.60.45.65:9091/hello");
-
-        BillData splitPayment = new BillData();
-        splitPayment.setOrgCode("ORG002");
-        splitPayment.setMerchantNo("MCH2023002");
-        splitPayment.setMerchantOrderNo("ORD20231116002");
-        splitPayment.setChannelSerialNo("CS20231116002");
-        splitPayment.setBaoRongSerialNo("BR20231116002");
-        splitPayment.setThirdPartySerialNo("UP2023111600001");
-        splitPayment.setChannelName("微信");
+        ExpectBill splitPayment = new ExpectBill();
+        splitPayment.setOrgCode("120251010224000");
+        splitPayment.setMerchantNo("12");
+        //120251010224000
+        splitPayment.setMerchantOrderNo("20240522120251010224037001786");
+        splitPayment.setChannelSerialNo("03120241430610345044015");
+        splitPayment.setOriginalBaoRongSerialNo("03120241430610345044015");
+        splitPayment.setBaoRongSerialNo("03120241430610345044015");
+        splitPayment.setChannelName("工行");
         splitPayment.setTradeDirection("收入");
-        splitPayment.setTradeDate("2023-11-16");
-        splitPayment.setSettleDate("2023-11-17");
+        splitPayment.setTradeDate(new Date());
+        splitPayment.setSettleDate(new Date());
+        splitPayment.setSplitMerchantNo("12");
         splitPayment.setTradeAmount("200.00");
         splitPayment.setFee("1.20");
-        splitPayment.setPayMethod("银联");
-        splitPayment.setTerminalId("T002");
-        splitPayment.setSplitFlag("支付时分账");
-        splitPayment.setSplitOrgCode("ORG003");
-        splitPayment.setSplitMerchantNo("MCH2023003");
-        splitPayment.setSplitDetailSerialNo("SD20231116001");
-        splitPayment.setSplitAmount("50.00");
-        splitPayment.setSplitFee("0.30");
-        splitPayment.setCounterpartyAccountNew("unionpay_acct_456");
-        splitPayment.setCounterpartyNameNew("李四超市");
-        splitPayment.setCallbackUrl("http://localhost:9091/hello");
+        splitPayment.setPayMethod("银行卡");
+        splitPayment.setTerminalId("120251010224037");
+        splitPayment.setSplitFlag("不分账");
+        splitPayment.setCallbackUrl("http://10.60.45.65:9091/fileUpload/callback");
 
-        BillData refundPayment = new BillData();
-        refundPayment.setOrgCode("ORG001");
-        refundPayment.setMerchantNo("MCH2023001");
-        refundPayment.setMerchantOrderNo("ORD20231116001");
-        refundPayment.setChannelSerialNo("CS20231116003");
-        refundPayment.setBaoRongSerialNo("BR20231116003");
-        refundPayment.setOriginalBaoRongSerialNo("BR20231116001"); // 原支付流水
-        refundPayment.setThirdPartySerialNo("20231116210000000001");
-        refundPayment.setChannelName("支付宝");
-        refundPayment.setTradeDirection("支出");
-        refundPayment.setTradeDate("2023-11-18");
-        refundPayment.setSettleDate("2023-11-19");
-        refundPayment.setTradeAmount("100.00");
-        refundPayment.setFee("0.00");
-        refundPayment.setPayMethod("支付宝");
-        refundPayment.setTerminalId("T001");
-        refundPayment.setSplitFlag("不分账");
-        refundPayment.setCounterpartyAccountNew("alipay_user_123");
-        refundPayment.setCounterpartyNameNew("张三");
-        refundPayment.setCallbackUrl("http://10.60.45.65:9091/hello");
-
-        BillData wechatPayment = new BillData();
-        wechatPayment.setOrgCode("ORG004");
-        wechatPayment.setMerchantNo("MCH2023004");
-        wechatPayment.setMerchantOrderNo("ORD20231116004");
-        wechatPayment.setChannelSerialNo("CS20231116004");
-        wechatPayment.setBaoRongSerialNo("BR20231116004");
-        wechatPayment.setThirdPartySerialNo("wx1234567890abcdef");
-        wechatPayment.setChannelName("易企收");
-        wechatPayment.setTradeDirection("收入");
-        wechatPayment.setTradeDate("2023-11-16");
-        wechatPayment.setSettleDate("2023-11-17");
-        wechatPayment.setTradeAmount("88.00");
-        wechatPayment.setFee("0.53");
-        wechatPayment.setPayMethod("支付宝");
-        wechatPayment.setTerminalId("T004");
-        wechatPayment.setSplitFlag("不分账");
-        wechatPayment.setMerchantDiscount("5.00");
-        wechatPayment.setPlatformDiscount("7.00"); // 平台大促优惠
-        wechatPayment.setChannelDiscount("0.00");
-        wechatPayment.setCounterpartyAccountNew("wx_user_789");
-        wechatPayment.setCounterpartyNameNew("王五");
-        wechatPayment.setCallbackUrl("http://10.60.45.65:9091/hello");
+        //错误信息
+//        splitPayment.setOrgCode("120251010224000");
+//        splitPayment.setMerchantNo("12");
+//        //120251010224000
+//        splitPayment.setMerchantOrderNo("20240522120251010224037001786");
+//        splitPayment.setChannelSerialNo("03120241430610345044015");
+//        splitPayment.setOriginalBaoRongSerialNo("03120241430610345044015");
+//        splitPayment.setBaoRongSerialNo("03120241430610345044015");
+//        splitPayment.setChannelName("工行");
+//        splitPayment.setTradeDirection("收入");
+//        splitPayment.setTradeDate(new Date());
+//        splitPayment.setSettleDate(new Date());
+//        splitPayment.setSplitMerchantNo("12");
+//        splitPayment.setTradeAmount("200.00");
+//        splitPayment.setFee("1.20");
+//        splitPayment.setPayMethod("银行卡");
+//        splitPayment.setTerminalId("120251010224037");
+//        splitPayment.setSplitFlag("不分账");
+//        splitPayment.setCallbackUrl("http://10.60.45.65:9091/fileUpload/callback");
 
         // 添加到列表
-        info.add(test1);
         info.add(splitPayment);
-        info.add(wechatPayment);
-        info.add(refundPayment);
 
-        for (BillData data : info) {
+        for (ExpectBill data : info) {
             String recordId = data.getRecordId();
             data.setRecordId(recordId);
         }
-        LinkedHashMap<String, List<BillData>> infoMap = excel.PartitionExcel(info, excelSize,excelName);
+        LinkedHashMap<String, List<ExpectBill>> infoMap = excel.PartitionExcel(info, excelSize,excelName);
         if (infoMap == null) {
             return;
         }
-        for (Map.Entry<String, List<BillData>> entry : infoMap.entrySet()) {
+        for (Map.Entry<String, List<ExpectBill>> entry : infoMap.entrySet()) {
             filePath = ExcelPath + entry.getKey();
-            List<BillData> data = entry.getValue();
+            List<ExpectBill> data = entry.getValue();
             //渠道数量
             Set<String> channelSet = data.stream()
-                    .map(BillData::getChannelName)
+                    .map(ExpectBill::getChannelName)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
 
@@ -173,8 +118,8 @@ public class Audit327 {
                         .sheet("收单对账数据",
                                 Arrays.asList(
                                         new String[]{
-                                        "组织",
-                                        "商户号",
+                                        "订单组织代码",
+                                        "收单商户号",
                                         "商户订单号",
                                         "保融交易流水号",
                                         "渠道流水号",
@@ -242,8 +187,8 @@ public class Audit327 {
                                                 b.getOriginalBaoRongSerialNo(),
                                                 b.getChannelName(),
                                                 b.getTradeDirection(),
-                                                b.getTradeDate(),
-                                                b.getSettleDate(),
+                                                (b.getTradeDate() != null ? sdt.format(b.getTradeDate()) : ""),
+                                                (b.getSettleDate() != null ? sdt.format(b.getSettleDate()) : ""),
                                                 b.getTradeAmount(),
                                                 b.getFee(),
                                                 b.getPayMethod(),
@@ -269,7 +214,29 @@ public class Audit327 {
                                 //标题
                                 new String[]{
                                         "渠道名称"},
-                                channelName
+                                Arrays.asList(
+                                        new String[]{"工行"},
+                                        new String[]{"农行"},
+                                        new String[]{"建行"},
+                                        new String[]{"中信银行"},
+                                        new String[]{"平安"},
+                                        new String[]{"招行"},
+                                        new String[]{"建行-惠市宝"},
+                                        new String[]{"拉卡拉"},
+                                        new String[]{"北京银商"},
+                                        new String[]{"银商总部"},
+                                        new String[]{"富友"},
+                                        new String[]{"支付宝"},
+                                        new String[]{"微信"},
+                                        new String[]{"中信-POS"},
+                                        new String[]{"兴业"},
+                                        new String[]{"快钱"},
+                                        new String[]{"杭州银行"},
+                                        new String[]{"通联"},
+                                        new String[]{"国通星驿"},
+                                        new String[]{"汇付天下"},
+                                        new String[]{"易生"}
+                                )
                         );
                 soleId = excelGenerator.calcultateContentHash();
                 excelGenerator.save(filePath);
@@ -283,15 +250,15 @@ public class Audit327 {
 //        File excels = new File(ExcelPath);
 //        String ExcelsPath = excels.getAbsolutePath();
 //       压缩并加密               Tran_企业编号_业务系统标识_交易日期_唯一编号.zip
-//        zipPath = zip.zipEncrypt(ExcelsPath, zipPath, Constants.ZIP_PASSWORD, zipName);
+//        zipPath = zip.zipEncrypt(ExcelsPath, zipPath, constants.ZIP_PASSWORD, zipName);
 
 ////             上传文件（FTP）
 //        try (FileInputStream input = new FileInputStream(new File(zipPath))) {
 //
 //            String fileName = zipPath.substring(zipPath.lastIndexOf('/') + 1);
-//            FtpUtil.upload(Constants.FTP_HOST, Constants.FTP_PORT, Constants.FTP_USER, Constants.FTP_PASS, Constants.FTP_PATH, fileName, input);
+//            FtpUtil.upload(constants.FTP_HOST, constants.FTP_PORT, constants.FTP_USER, constants.FTP_PASS, constants.FTP_PATH, fileName, input);
 //            // 成功上传后-通知模块
-//            notice.noticeAudit(Constants.BASE_PATH, Constants.API_PATH, interfaceVersion, transSeqNo, type, Constants.FTP_PATH, zipName);
+//            notice.noticeAudit(constants.BASE_PATH, constants.API_PATH, interfaceVersion, transSeqNo, type, constants.FTP_PATH, zipName);
 //
 //        } catch (FileNotFoundException e) {
 //            throw new RuntimeException("压缩文件找不到 " + zipPath, e);
@@ -306,9 +273,9 @@ public class Audit327 {
                 FileInputStream input = new FileInputStream(new File(filePath))){
 
             String fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-            sftp.upload(Constants.SFTP_HOST, Constants.SFTP_PORT, Constants.SFTP_USER, Constants.SFTP_PASS, Constants.SFTP_PATH_327, fileName, input);
+            sftp.upload(constants.SFTP_HOST, constants.SFTP_PORT, constants.SFTP_USER, constants.SFTP_PASS, constants.SFTP_PATH_327, fileName, input);
             //成功上传后-通知模块
-            notice.noticeAudit(Constants.BASE_PATH,Constants.API_PATH,interfaceVersion,transSeqNo,type,Constants.SFTP_PATH_327,fileName);
+            notice.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,type, constants.SFTP_PATH_327,fileName);
         } catch (
                 FileNotFoundException e) {
             throw new RuntimeException("压缩文件找不到 "+zipPath,e);

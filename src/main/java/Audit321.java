@@ -1,5 +1,5 @@
-import Config.Constants;
-import Data.Data;
+import config.constants;
+import domian.ReconBill;
 import Util.*;
 
 import java.io.File;
@@ -15,15 +15,15 @@ public class Audit321 {
     public static void Audit321(int excelSize) throws IOException, NoSuchAlgorithmException {
         //应收账单3.2.1
         //日期格式
-        SimpleDateFormat sdt = new SimpleDateFormat("yyyyMMdd");
-
+        SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         String soleID = "";
 
         //命名数据
         String fileType = "Tran";//文件类型 Tran\Alloc\BankFlow\TranAuditResult
         String entCode = "ZN330301"; //企业编号
-        String tranTime = sdt.format(new Date());//当前时间
-        String tranType = "微信";//企业收银方式
+        String tranTime = sdf.format(new Date());//当前时间
+        String tranType = "转账";//企业收银方式
         String opCode = "ADD";//操作码 ADD UPDATE DEL NOTICE
         String businessTag = "CRM";//业务类型
 
@@ -40,98 +40,62 @@ public class Audit321 {
         String excelName = fileType + "_" + entCode + "_" + tranTime + "_" + tranType + "_" + opCode;
         String zipName = fileType + "_" + entCode + "_" + businessTag + "_" + tranTime;
         //生成的Excel
-        List<Data> info = new ArrayList<Data>();
+        List<ReconBill> info = new ArrayList<ReconBill>();
 
         //工具类的创建
         ExcelUtil excel = new ExcelUtil();
         ZipUtil zip = new ZipUtil();
         SftpUtil sftp = new SftpUtil();
         NoticeUtil notice = new NoticeUtil();
-        DateUtil date = new DateUtil();
         //测试数据
-        Data test1 = new Data();
-        Data test2 = new Data();
-        Data test3 = new Data();
+        ReconBill test1 = new ReconBill();
+        ReconBill test2 = new ReconBill();
 
-        test1.setOrderOrgCode("ORG001");
-        test1.setAcquiringMerchantNo("MCH123456789");
-        test1.setBizSystemCode("POS");
-        test1.setReceivableOrderNo("SO20250405001");
-        test1.setMerchantOrderNo("PAY20250405001");
-        test1.setChannelSerialNo("WX202504050001");
+        test1.setOrderOrgCode("S112");
+        test1.setAcquiringMerchantNo("11889900");
+        test1.setBizSystemCode("XSC");
+        test1.setReceivableOrderNo("XSC0000001");
+        test1.setMerchantOrderNo("0000000001");
         test1.setIncomeExpenseFlag("2"); // 收入
         test1.setAmount("100"); // 100分 = 1元
-        test1.setTradeTime(date.parseDate(("20250401")));
+        test1.setTradeTime(new Date());
         test1.setOriginalTradeTime(null); // 可选，非现金上缴可为空
-        test1.setEnterpriseCashieType("WECHAT_SCAN");
-        test1.setRemark("门店扫码支付");
-        test1.setCounterpartyName(""); // 非转账可留空
-        test1.setCounterpartyAccount("");
-        test1.setCounterpartyBank("");
-        test1.setPurpose("日常收款");
-        test1.setAuditNotifyUrl("http://10.60.45.65:9091/hello");
+        test1.setEnterpriseCashieType("转账");
+        test1.setAuditNotifyUrl("http://10.60.45.65:9091/fileUpload/callback");
         test1.setDeliveryOrderFlag("1"); // 是发货订单
-        test1.setConfirmReceiveTime(date.parseDate(("20250401"))); // 假设已收货
+        test1.setConfirmReceiveTime(new Date());
         test1.setExtendInfo("{\"extend1\":\"手机\",\"extend2\":\"1\",\"extend3\":\"0.5\",\"extend5\":\"李四\"}");
 
-        test2.setOrderOrgCode("ORG002");
-        test2.setAcquiringMerchantNo("MCH123456789");
-        test2.setBizSystemCode("POS");
-        test2.setReceivableOrderNo("SO20250405002");
-        test2.setMerchantOrderNo("PAY20250405002");
-        test2.setChannelSerialNo("ALI202504050002");
+        test2.setOrderOrgCode("S113");
+        test2.setAcquiringMerchantNo("11889911");
+        test2.setBizSystemCode("HY");
+        test2.setReceivableOrderNo("HY0000001");
+        test2.setMerchantOrderNo("0000000002");
         test2.setIncomeExpenseFlag("2"); // 收入
-        test2.setAmount("111100"); // 111100分 = 1111.00元
-        test2.setTradeTime(date.parseDate(("20250401")));
-        test2.setOriginalTradeTime(null);
-        test2.setEnterpriseCashieType("ALIPAY_SCAN");
-        test2.setRemark("支付宝门店收款");
-        test2.setCounterpartyName("");
-        test2.setCounterpartyAccount("");
-        test2.setCounterpartyBank("");
-        test2.setPurpose("日常收款");
-        test2.setAuditNotifyUrl("http://10.60.45.65:9091/hello");
-        test2.setDeliveryOrderFlag("0"); // 不是发货订单（如服务费）
-        test2.setConfirmReceiveTime(null); // 非发货订单可为空
-        test2.setExtendInfo("{\"extend1\":\"会员充值\",\"extend2\":\"1\",\"extend3\":\"11.11\",\"extend5\":\"王五\"}");
-
-        test3.setOrderOrgCode("ORG003");
-        test3.setAcquiringMerchantNo("MCH987654321");
-        test3.setBizSystemCode("ERP");
-        test3.setReceivableOrderNo("SO20250405003");
-        test3.setMerchantOrderNo("REF20250405003");
-        test3.setChannelSerialNo("BANK20250405");
-        test3.setIncomeExpenseFlag("1"); // 支出（退款）
-        test3.setAmount("5000"); // 5000分 = 50元
-        test3.setTradeTime(date.parseDate(("20250401")));
-        test3.setOriginalTradeTime(date.parseDate(("20250401"))); // 原交易日期
-        test3.setEnterpriseCashieType("BANK_TRANSFER");
-        test3.setRemark("客户退货退款");
-        test3.setCounterpartyName("张三");
-        test3.setCounterpartyAccount("6222080200123456789");
-        test3.setCounterpartyBank("中国工商银行");
-        test3.setPurpose("退款");
-        test3.setAuditNotifyUrl("http://10.60.45.65:9091/hello");
-        test3.setDeliveryOrderFlag("0"); // 退款非发货订单
-        test3.setConfirmReceiveTime(null);
-        test3.setExtendInfo("{\"extend1\":\"退货订单\",\"extend2\":\"1\",\"extend5\":\"VIP客户\"}");
+        test2.setAmount("500"); // 100分 = 1元
+        test2.setTradeTime(new Date());
+        test2.setOriginalTradeTime(null); // 可选，非现金上缴可为空
+        test2.setEnterpriseCashieType("转账");
+        test2.setAuditNotifyUrl("http://10.60.45.65:9091/fileUpload/callback");
+        test2.setDeliveryOrderFlag("1"); // 是发货订单
+        test2.setConfirmReceiveTime(new Date()); //TODO 111
+        test2.setExtendInfo("{ \"extend1\": \"商品名称\", \"extend2\": \"购买数量\", \"extend3\": \"运费\", \"extend4\": \"单位金额\", \"extend5\": \"购买人名称\", \"extend6\": \"客户ID\", \"extend20\": \"其他自定义字段，最多支持20个\"}");
 
         // 添加到列表
         info.add(test1);
         info.add(test2);
-        info.add(test3);
         //生成唯一ID
-        for (Data data : info) {
+        for (ReconBill data : info) {
             String recordId = data.getRecordId();
             data.setRecordId(recordId);
         }
-        LinkedHashMap<String, List<Data>> infoMap = excel.PartitionExcel(info,excelSize,excelName);
+        LinkedHashMap<String, List<ReconBill>> infoMap = excel.PartitionExcel(info,excelSize,excelName);
         if (infoMap == null) {
             return;
         }
-        for (Map.Entry<String, List<Data>> entry : infoMap.entrySet()) {
+        for (Map.Entry<String, List<ReconBill>> entry : infoMap.entrySet()) {
             String filePath = ExcelPath + entry.getKey();
-            List<Data> data = entry.getValue();
+            List<ReconBill> data = entry.getValue();
             int total = data.size();
             //总金额
             int amount = data.stream()
@@ -176,8 +140,8 @@ public class Audit321 {
                                             d.getChannelSerialNo(),
                                             d.getIncomeExpenseFlag(),
                                             d.getAmount(),
-                                            (d.getTradeTime() != null ? d.getTradeTime().toString() : null),
-                                            (d.getOriginalTradeTime() != null ? d.getOriginalTradeTime().toString() : null),
+                                            (d.getTradeTime() != null ? sdt.format(d.getTradeTime()) : null),
+                                            (d.getOriginalTradeTime() != null ? sdt.format(d.getOriginalTradeTime()) : null),
                                             d.getEnterpriseCashieType(),
                                             d.getRemark(),
                                             d.getCounterpartyName(),
@@ -186,7 +150,7 @@ public class Audit321 {
                                             d.getPurpose(),
                                             d.getAuditNotifyUrl(),
                                             d.getDeliveryOrderFlag(),
-                                            (d.getConfirmReceiveTime() != null ? d.getConfirmReceiveTime().toString() : null),
+                                            (d.getConfirmReceiveTime() != null ? sdt.format(d.getConfirmReceiveTime()) : null),
                                             d.getExtendInfo(),
                                             d.getRecordId()})
                                     .collect(Collectors.toList())
@@ -204,7 +168,7 @@ public class Audit321 {
         File excels = new File(ExcelPath);
         String ExcelsPath = excels.getAbsolutePath();
 //       压缩并加密               Tran_企业编号_业务系统标识_交易日期_唯一编号.zip
-        zipPath = zip.zipEncrypt(ExcelsPath, zipPath, Constants.ZIP_PASSWORD, zipName, soleID);
+        zipPath = zip.zipEncrypt(ExcelsPath, zipPath, constants.ZIP_PASSWORD, zipName, soleID);
 
 //         上传文件（FTP）
 //    try (FileInputStream input = new FileInputStream(new File(zipPath))) {
@@ -225,9 +189,9 @@ public class Audit321 {
             try (FileInputStream input = new FileInputStream(new File(zipPath))){
 
                 String fileName = zipPath.substring(zipPath.lastIndexOf('/') + 1);
-                sftp.upload(Constants.SFTP_HOST, Constants.SFTP_PORT, Constants.SFTP_USER, Constants.SFTP_PASS, Constants.SFTP_PATH_321, fileName, input);
+                sftp.upload(constants.SFTP_HOST, constants.SFTP_PORT, constants.SFTP_USER, constants.SFTP_PASS, constants.SFTP_PATH_321, fileName, input);
                 //成功上传后-通知模块
-                notice.noticeAudit(Constants.BASE_PATH,Constants.API_PATH,interfaceVersion,transSeqNo,type,Constants.SFTP_PATH_321,fileName);
+                notice.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,type, constants.SFTP_PATH_321,fileName);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException("压缩文件找不到 "+zipPath,e);
             } catch (IOException e) {

@@ -1,9 +1,8 @@
-package Data;
+package domian;
 
 import java.util.Date;
-import java.util.UUID;
-
-public class  Data {
+//3.2.1 应收账单
+public class ReconBill {
 
 //	订单组织代码	String(32)	Y	订单所属组织
     private String orderOrgCode;

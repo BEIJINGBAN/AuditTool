@@ -1,7 +1,6 @@
 package Util;
 
-import Config.Constants;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import config.constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
 import org.apache.logging.log4j.LogManager;
@@ -87,16 +86,16 @@ public class NoticeUtil {
         try {
             TreeMap<String, Object> paramMap = new TreeMap<>();
             paramMap.put("bizContent", bizContentObj);
-            paramMap.put("mchId", Constants.MCH_ID);
-            paramMap.put("version", Constants.VERSION);
-            paramMap.put("signType",Constants.SIGN_TYPE );
+            paramMap.put("mchId", constants.MCH_ID);
+            paramMap.put("version", constants.VERSION);
+            paramMap.put("signType", constants.SIGN_TYPE );
             paramMap.put("nonceStr", nonceStr);
             paramMap.put("uniqueNo", uniqueNo);
 
-            String signContent = SignUtil.genSignContentWithSalt(paramMap, Constants.SALT_KEY);
+            String signContent = SignUtil.genSignContentWithSalt(paramMap, constants.SALT_KEY);
             log.info("待签名字符串： " + signContent);
 
-            String sign = SignUtil.rsaSign(signContent, Constants.PRIVATE_KEY, Constants.SIGN_ALGORITHM, Constants.CHARSET);
+            String sign = SignUtil.rsaSign(signContent, constants.PRIVATE_KEY, constants.SIGN_ALGORITHM, constants.CHARSET);
             if (sign == null || sign.trim().isEmpty()) {
                 log.info("签名失败，检查私钥格式");
                 result = false;

@@ -1,8 +1,8 @@
-package Data;
+package domian;
 
-import java.util.UUID;
-
-public class BillData {
+import java.util.Date;
+//3.2.7 对账单
+public class ExpectBill {
     // 组织
     private String orgCode;
 
@@ -31,10 +31,10 @@ public class BillData {
     private String tradeDirection;
 
     // 交易日期
-    private String tradeDate;
+    private Date tradeDate;
 
     // 清算日期
-    private String settleDate;
+    private Date settleDate;
 
     // 交易金额
     private String tradeAmount;
@@ -143,19 +143,19 @@ public class BillData {
         this.tradeDirection = tradeDirection;
     }
 
-    public String getTradeDate() {
+    public Date getTradeDate() {
         return tradeDate;
     }
 
-    public void setTradeDate(String tradeDate) {
+    public void setTradeDate(Date tradeDate) {
         this.tradeDate = tradeDate;
     }
 
-    public String getSettleDate() {
+    public Date getSettleDate() {
         return settleDate;
     }
 
-    public void setSettleDate(String settleDate) {
+    public void setSettleDate(Date settleDate) {
         this.settleDate = settleDate;
     }
 
