@@ -1,5 +1,6 @@
 package Util;
 
+import com.alibaba.fastjson.JSON;
 import config.constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
@@ -16,7 +17,7 @@ public class NoticeUtil {
 
     private static final Logger log = LogManager.getLogger(NoticeUtil.class);
 
-    private static final OkHttpClient client = new OkHttpClient.Builder()
+    private static final OkHttpClient client = new OkHttpClient.Builder()//TODO 消除重传 异步
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
@@ -30,12 +31,12 @@ public class NoticeUtil {
 
     public static void noticeAudit(String BASE_URL, String API_PATH,
                                       String interfaceVersion, String transSeqNo,
-                                      String type, String filePath, String fileName) {
+                                      String type, String filePath, String fileName) {//TODO 进一步封装
         //随机计算
         String nonceStr = generateNonceStr();
         String uniqueNo = generateNonceStr();
 
-        TreeMap<String,Object> bizContentObj = new TreeMap<>();
+        TreeMap<String,Object> bizContentObj = new TreeMap<>();//TODO 封装到另一个
         bizContentObj.put("interfaceVersion",interfaceVersion);
         bizContentObj.put("transSeqNo",transSeqNo);
         bizContentObj.put("type",type);
@@ -54,36 +55,36 @@ public class NoticeUtil {
             String signContent = SignUtil.genSignContentWithSalt(paramMap, constants.SALT_KEY);
             log.info("待签名字符串： " + signContent);
 
-            String sign = SignUtil.rsaSign(signContent, constants.PRIVATE_KEY, constants.SIGN_ALGORITHM, constants.CHARSET);
+            String sign = SignUtil.rsaSign(signContent, constants.PRIVATE_KEY, constants.SIGN_ALGORITHM, constants.CHARSET);// TODO 签名未处理
             if (sign == null || sign.trim().isEmpty()) {
                 log.info("签名失败，检查私钥格式");
             }
             log.info("签名" + sign);
 
-            Map<String, Object> finalJson = new TreeMap<>();
+            Map<String, Object> finalJson = new TreeMap<>();// TODO 命名
             finalJson.putAll(paramMap);
             finalJson.put("sign", sign);
 
-            String json = mapper.writeValueAsString(finalJson);
-            log.info("请求JSON为 ： " + json);
+            String json = JSON.toJSONString(finalJson);//TODO 学习// mapper.writeValueAsString(finalJson);
+            log.info("请求JSON为 ： " + json);//TODO 日志规范
 
             Request request = new Request.Builder()
                     .url(BASE_URL + API_PATH)
                     .post(okhttp3.RequestBody.create(json,MediaType.get(("application/json; charset=utf-8"))))
                     .build();
 
-            try (Response response = client.newCall(request).execute()) {
+            try (Response response = client.newCall(request).execute()) {//TODO
                 if (response.isSuccessful()) {
-                    String responseBody = response.body().string();
-                    log.info("通知成功，响应： " + responseBody);
+                    String responseBody = response.body().string();//TODO
+                    log.info("通知成功，响应： " + responseBody);     //TODO 具体信息
+                                                                    //TODO 通知码输出/判断
                 } else {
                     String errorMsg = response.body() != null ? response.body().string() : "未知错误";
                     log.error("请求失败，状态码： " + response.code() + "；响应： " + errorMsg);
                 }
             }
         }catch (IOException e) {
-            log.error("请求异常" + e.getMessage());
-            e.printStackTrace();
+            log.error("请求异常",  e);
         }
     }
 }

@@ -7,7 +7,7 @@ public class constants {
     //通知信息
     public static final String PRIVATE_KEY = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKyz5fDAybzJA5DR4dMnejc28a3VWez68vxpWEDt0A94+6f1xjaGICjZC9bO/8cakFL28SLRnqIo2H063UEEMkhXIRFEeiYFqeXWctmtmFZ17Xhr5PqnpQKVKxfCPoMqbGlD5f+7gJVuQk+/c5EOcGJI7q7zS5cp2A6YLJirK4CRAgMBAAECgYAZMJguWIBUV+F8QxC0MsLhwNLZbxARv7ynUlo8BjPdveC+69tAYqnYK2hNqZ2nFdnNMBWV5YtEzb5d7bMN46XNqAjhoWvd6MKtWVC5knlmkhZ6lgaQPC5DcB6KGF+X3EFlErn7colkW4VhuRsjBn3ebrRbd8DHBPMh8g/cFCiOfQJBANNqj5HGAwQ6fK9lNRKqC/0SazN1IUjWW7LLx6JmFmy681xIkYh8vaTRDnD5atjwScQ9d+0eqq/RTpCar3qriwcCQQDRH10G1hzvsMDqC0oNm6S2DI0/QxdLgvO8USq2r0GMFn8kFceiUkK51gaQCngCHEIRMPS2F/XUn2DKfNSYJvmnAkEAnzYejH78ApExGL007KtWf+0BAi1xNXMId2tzGd+bf6KCZrrXrluSTa6KG5YZWuoKA1jvGYkArYsIiWmUQOMyvQJBAK1hk39XhiY0Jb3mHj+qC6XkQjdxKJ8ys2Iu6XsNUwsSm9cPN7Uc/rWU/VvvUhBt3VjjfgB7XRYsDdPUK2764YECQCkQ5KEd/YvnJ+q/1tHRYyArjRyhvUdFpMupV1rRz1Kkggbj2Q87njesA+zm6B9h+ScTk1xiAZj+jQHn/PhRKcU=";
     public static final String SALT_KEY = "c9b576e12251f3a7f30c548672fcbd9a";             //盐值
-    public static final String SIGN_TYPE = "SHA256withRSA";               //签名算法
+    public static final String SIGN_TYPE = "SHA256withRSA";          //TODO     //签名算法
     public static final String CHARSET = "UTF-8";
     public static final String MCH_ID ="ZN330301";
     public static final String VERSION = "1.0";
@@ -19,6 +19,7 @@ public class constants {
     public static final String ZIP_PASSWORD = "zn12345";
 
     //FTP
+    //TODO 与保融申请账号密码
     public static final String FTP_HOST = "172.18.13.96";
     public static final    int FTP_PORT = 21;
     public static final String FTP_USER = "fingard1";
@@ -26,12 +27,13 @@ public class constants {
     public static final String FTP_PATH = "/data/ftp/data/ftp/zhenongfa/expectdetail/upload/";
 
     //SFTP信息
+    //TODO 与保融申请账号密码
     public static final String SFTP_HOST = "172.18.13.96";
     public static final    int SFTP_PORT = 22;
     public static final String SFTP_USER = "fingard1";
     public static final String SFTP_PASS = "JyB9Wm4qNZ";
-    public static final String SFTP_PATH_321 = "/data/ftp/data/ftp/data/ftp/zhenongfa/expectdetail/upload";
-    public static final String SFTP_PATH_327 = "/data/ftp/data/ftp/data/ftp/zhenongfa/recontransdetail/upload";
+    public static final String SFTP_PATH_321 = "/data/ftp/data/ftp/data/ftp/zhenongfa/expectdetail/upload";//TODO 公司名字
+    public static final String SFTP_PATH_327 = "/data/ftp/data/ftp/data/ftp/zhenongfa/recontransdetail/upload";//TODO 公司名字
 
     //通知地址
     public static final String BASE_PATH = "http://10.60.45.34:8204";

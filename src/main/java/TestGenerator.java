@@ -27,7 +27,7 @@ public class TestGenerator {
         splitPayment.setPayMethod("银行卡");
         splitPayment.setTerminalId("120251010224037");
         splitPayment.setSplitFlag("不分账");
-        splitPayment.setCallbackUrl("http://10.60.45.65:9091/fileUpload/callback");
+        splitPayment.setCallbackUrl("http://10.60.45.65:9091/fileUpload/callback");//TODO 全局常量
 
         // 添加到列表
         expectBills.add(splitPayment);

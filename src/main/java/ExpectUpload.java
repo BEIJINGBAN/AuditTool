@@ -33,10 +33,11 @@ public class ExpectUpload {
 
         //通知易企收需携带字段
         String interfaceVersion = "1.0";
+        //交易流水号
         String transSeqNo = "NoABC";
 
         //生成Excel每一行 回溯ID时忽略的字段
-        String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};
+        String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};//TODO
         // String[] ignoreFiellds ={"recordId"};//TODO 实际生产中根据需要忽略字段
 
         //TODO 以下为生成的Excel测试数据，实际生产请用真实数据代替
@@ -64,7 +65,9 @@ public class ExpectUpload {
             filePath = ExcelPath + entry.getKey();
             List<ExpectBill> data = entry.getValue();
             try {
-                ExcelUtil.ExcelGenerator excelGenerator = ExcelUtil.ExcelGenerator.create()
+                ExcelUtil.ExcelGenerator excelGenerator = ExcelUtil.ExcelGenerator.create()//TODO
+                            //TODO 将数据写入
+                        //  //TODO 通过读模板写入数据
                         //表一
                         .sheet("收单对账数据",
                                 Arrays.asList(
