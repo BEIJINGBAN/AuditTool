@@ -77,23 +77,20 @@ public class SftpUtil {
     }
 
     //文件上传
-    public static boolean upload(String host, int port, String username,
+    public static void upload(String host, int port, String username,
                               String password, String basePath,
                               String sftpFileName, InputStream input)throws Exception{
         log.info("Sftp开始上传");
-        boolean success = true;
         ChannelSftp sftp = login(host, port, username, password);
         mkdir(sftp, basePath);
         try{
             sftp.put(input, sftpFileName);
         }catch(SftpException e){
             log.error("上传文件失败"+e);
-            success = false;
         }finally {
             logout(sftp);
         }
         log.info("文件上传完成");
-        return success;
     }
 
 
@@ -187,7 +184,7 @@ public class SftpUtil {
     //递归创建文件夹
     public static void mkdir(ChannelSftp sftp,String basePath)throws Exception {
         try {
-            sftp.;//TODO
+            sftp.cd(basePath);//TODO
         } catch (SftpException e) {
             List<String> dirs = StrUtil.split(basePath, "/");
             String tempPath = "";

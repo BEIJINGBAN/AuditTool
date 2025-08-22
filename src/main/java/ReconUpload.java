@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 */
 
 public class ReconUpload {
-    public static void reconBillUpload(int excelSize) throws IOException, NoSuchAlgorithmException {
+    public static void reconBillUpload() throws IOException, NoSuchAlgorithmException {
         //日期格式
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -39,7 +39,12 @@ public class ReconUpload {
         String interfaceVersion = "1.0";//接口版本
         String type = "1";//通知类型
 
-        //生成的Excel
+        //生成回溯ID忽略的字段
+        String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};
+        // String[] ignoreFiellds ={"recordId"};//TODO 实际生产中根据需要忽略字段
+        //上传的每个Excel的行数
+        int excelSize = 1;
+
         //TODO  测试生成不规范 (已解决)
         List<ReconBill> infos= TestGenerator.reconBillsGeneretor();
 
@@ -52,7 +57,6 @@ public class ReconUpload {
         //收集每个Excel文件的soleID
         List<String> soleIDs = new ArrayList<>();
 
-        String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};
         //TODO 唯一值生成不规范 (已解决)
         for (ReconBill data : infos) {
             String recordId = ExcelUtil.recordIdGenerate(data, ignoreFiellds);

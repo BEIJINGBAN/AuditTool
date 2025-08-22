@@ -5,9 +5,9 @@ import java.security.NoSuchAlgorithmException;
 public class Main {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
-//        ExpectUpload.expectBillUpload(5);
+//        ExpectUpload.expectBillUpload();
 //
-        ReconUpload.reconBillUpload(1);
+        ReconUpload.reconBillUpload();
 //        SftpTest.Delete();
     }
 }

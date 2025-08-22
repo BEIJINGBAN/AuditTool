@@ -1,8 +1,5 @@
-package Util;
-
 import domian.ExpectBill;
 import domian.ReconBill;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -72,7 +69,7 @@ public class TestGenerator {
         test2.setEnterpriseCashieType("转账");
         test2.setAuditNotifyUrl("http://10.60.45.65:9091/fileUpload/callback");
         test2.setDeliveryOrderFlag("1"); // 是发货订单
-        test2.setConfirmReceiveTime(new Date()); //TODO 111
+        test2.setConfirmReceiveTime(new Date());
         test2.setExtendInfo("{ 更新了 之后 之后 之后 之后}");
 
         reconBills.add(test1);

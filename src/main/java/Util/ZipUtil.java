@@ -49,7 +49,7 @@ public class ZipUtil {
         }
     }
 
-    //压缩后加密
+    //唯一编号
     public static String zipHash(List<String> soleIDs) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

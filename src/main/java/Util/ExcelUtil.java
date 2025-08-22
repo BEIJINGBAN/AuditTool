@@ -26,34 +26,34 @@ public class ExcelUtil {
     private static final Logger log = LogManager.getLogger(ExcelUtil.class);
 
     //分割Excel
-    public static <T> LinkedHashMap PartitionExcel(List<T> info, int maxSize,String baseName){
-        if (info == null || info.size() == 0 ) {
+    public static <T> LinkedHashMap PartitionExcel(List<T> infos, int maxSize,String baseName){
+        if (infos == null || infos.size() == 0 ) {
             log.error("没有数据需要分割");
             return new LinkedHashMap();
         }
-        int divisionSize = (info.size() + (maxSize - 1)) / maxSize;
-        LinkedHashMap<String,List<T>> InfoMap = new LinkedHashMap<>();
+        int divisionSize = (infos.size() + (maxSize - 1)) / maxSize;
+        LinkedHashMap<String,List<T>> infoMap = new LinkedHashMap<>();
         //文件从1开始
-        int ExcelIndex = 1;
+        int excelIndex = 1;
         int j = 0;
 
-        while(j < info.size()) {
+        while(j < infos.size()) {
             List<T> list = new ArrayList<T>();
 
-            int end = Math.min(info.size(),j+maxSize);
+            int end = Math.min(infos.size(),j+maxSize);
             for(; j<end; j++){
-                list.add(info.get(j));
+                list.add(infos.get(j));
             }
             //取名
-            String ExcelName = (divisionSize == 1) ? baseName +".xlsx" :  baseName + "_" + String.format("%03d.xlsx",ExcelIndex);//TODO
+            String excelName = (divisionSize == 1) ? baseName +".xlsx" :  baseName + "_" + String.format("%03d.xlsx",ExcelIndex);//TODO
 
-            InfoMap.put(ExcelName,list);
+            infoMap.put(excelName,list);
 
             j = end;
 
-            ExcelIndex++;
+            excelIndex++;
         }
-        return InfoMap;
+        return infoMap;
     }
 
 

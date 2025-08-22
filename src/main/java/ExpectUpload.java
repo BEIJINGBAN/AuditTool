@@ -1,7 +1,6 @@
 import config.constants;
 import domian.ExpectBill;
 import Util.*;
-import domian.ReconBill;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,8 +16,7 @@ import java.util.stream.Collectors;
 */
 
 public class ExpectUpload {
-    public static void expectBillUpload(int excelSize) throws FileNotFoundException, IOException, NoSuchAlgorithmException {
-
+    public static void expectBillUpload() throws FileNotFoundException, IOException, NoSuchAlgorithmException {
 
         //规范日期格式
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -29,14 +27,21 @@ public class ExpectUpload {
         String billName = "收账单对账数据";
         String tranTime = sdf.format(new Date());
 
-        //文件地址
+        //本地文件地址
         String zipPath = "./src/";
         String ExcelPath = "./src/main/audit327/";
 
-        //通知信息
+        //通知易企收需携带字段
         String interfaceVersion = "1.0";
         String transSeqNo = "NoABC";
         String type = "2";
+
+        //生成Excel每一行 回溯ID时忽略的字段
+        String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};
+        // String[] ignoreFiellds ={"recordId"};//TODO 实际生产中根据需要忽略字段
+
+        //上传的每个Excel的行数
+        int excelSize = 1;
 
         //TODO 以下为生成的Excel测试数据，实际生产请用真实数据代替
         List<ExpectBill> infos = TestGenerator.expectBillsGenerator();
@@ -45,12 +50,7 @@ public class ExpectUpload {
         //应收上传
         String filePath = "";
         String excelName = billName + "_" + tranTime;
-        String zipName = billName + "_" + tranTime;
-        String soleId = "";
 
-        List<String> soleIDs = new ArrayList<>();
-        //生成回溯ID忽略的字段
-        String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};
         //TODO 唯一值生成不规范 (已解决）
         for (ExpectBill data : infos) {
             String recordId = ExcelUtil.recordIdGenerate(data, ignoreFiellds);
