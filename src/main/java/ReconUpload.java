@@ -21,7 +21,7 @@ public class ReconUpload {
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
-        //TODO 以下为可修改数据
+        //TODO 以下数据根据具体
         //文件类型 Tran\Alloc\BankFlow\TranAuditResult
         String fileType = "Tran";
         String entCode = "ZN330301";
@@ -53,9 +53,10 @@ public class ReconUpload {
         //TODO  测试生成不规范
         List<ReconBill> infos= TestGenerator.reconBillsGeneretor();
 
+        String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};
         //TODO 唯一值生成不规范
         for (ReconBill data : infos) {
-            String recordId = ExcelUtil.recordIdGenerate(data, new String[]{data.getRecordId()});
+            String recordId = ExcelUtil.recordIdGenerate(data, ignoreFiellds);
             data.setRecordId(recordId);
         }
         //TODO
@@ -71,7 +72,6 @@ public class ReconUpload {
             int amount = data.stream()
                     .mapToInt(d -> Integer.parseInt(d.getAmount()))
                     .sum();
-
             ExcelUtil.ExcelGenerator excelGenerator = ExcelUtil.ExcelGenerator.create()
                     //表一
                     .sheet("总览表", new String[]{"总笔数", "总金额"},
@@ -137,17 +137,15 @@ public class ReconUpload {
         //取绝对路径
         File excels = new File(excelPath);
         String excelsPath = excels.getAbsolutePath();
-//       压缩并加密
-//       zip文件名模板： Tran_企业编号_业务系统标识_交易日期_唯一编号.zip
+        //压缩加密
+        //zip文件名模板： Tran_企业编号_业务系统标识_交易日期_唯一编号.zip
         zipPath = ZipUtil.zipEncrypt(excelsPath, zipPath, constants.ZIP_PASSWORD, zipName, soleID);
-
         //上传文件（SFTP）
             try (FileInputStream input = new FileInputStream(new File(zipPath))){
-
                 String fileName = zipPath.substring(zipPath.lastIndexOf('/') + 1);
                 SftpUtil.upload(constants.SFTP_HOST, constants.SFTP_PORT, constants.SFTP_USER, constants.SFTP_PASS, constants.SFTP_PATH_321, fileName, input);
                 //成功上传后-通知模块
-                NoticeUtil.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,type, constants.SFTP_PATH_321,fileName);//TODO
+                NoticeUtil.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,type, constants.SFTP_PATH_321,fileName);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException("压缩文件找不到 "+zipPath,e);
             } catch (IOException e) {

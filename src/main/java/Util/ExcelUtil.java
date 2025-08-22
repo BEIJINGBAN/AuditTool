@@ -188,10 +188,18 @@ public class ExcelUtil {
                 if (ignoreList.contains(field.getName())){
                     continue;
                 }
-                contetBuilder.append("|");
+                field.setAccessible(true);
+                Object value = field.get(obj);
+                contetBuilder.append(field.getName())
+                        .append("=")
+                        .append(value)
+                        .append("|");
+
             }
         }catch (IllegalArgumentException e){
             log.error("生成唯一ID失败 "+e.getMessage());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
         String content = contetBuilder.toString();
         if (content.isEmpty()){

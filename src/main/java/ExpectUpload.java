@@ -1,6 +1,7 @@
 import config.constants;
 import domian.ExpectBill;
 import Util.*;
+import domian.ReconBill;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,11 +42,14 @@ public class ExpectUpload {
         String excelName = billName + "_" + tranTime;
         String zipName = billName + "_" + tranTime;
         String soleId = "";
-        //生成的Excel
+        //TODO 以下为生成的Excel测试数据，实际生产请用真实数据代替
         List<ExpectBill> infos = TestGenerator.expectBillsGenerator();
 
+        //生成回溯ID忽略的字段
+        String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};
+        //TODO 唯一值生成不规范
         for (ExpectBill data : infos) {
-            String recordId = ExcelUtil.recordIdGenerate(data, new String[]{data.getRecordId()});
+            String recordId = ExcelUtil.recordIdGenerate(data, ignoreFiellds);
             data.setRecordId(recordId);
         }
         LinkedHashMap<String, List<ExpectBill>> infoMap = ExcelUtil.PartitionExcel(infos, excelSize,excelName);
