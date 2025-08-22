@@ -37,7 +37,6 @@ public class ReconUpload {
         // 通知信息
         String transSeqNo = "NoABC";
         String interfaceVersion = "1.0";//接口版本
-        String type = "1";//通知类型
 
         //生成回溯ID忽略的字段
         String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};
@@ -49,6 +48,8 @@ public class ReconUpload {
         List<ReconBill> infos= TestGenerator.reconBillsGeneretor();
 
         //TODO 以下为系统功能逻辑
+        //对应应收账单的接口序号
+
         //名字组装
         String excelName = fileType + "_" + entCode + "_" + tranTime + "_" + tranType + "_" + opCode;
         String zipName = fileType + "_" + entCode + "_" + businessTag + "_" + tranTime;
@@ -63,12 +64,12 @@ public class ReconUpload {
             data.setRecordId(recordId);
         }
         //TODO 空指针 (已解决)
-        LinkedHashMap<String, List<ReconBill>> infoMap = ExcelUtil.PartitionExcel(infos,excelSize,excelName);
+        LinkedHashMap<String, List<ReconBill>> infoMap = ExcelUtil.PartitionExcel(infos,constants.EXCEL_SIZE);
         if (infoMap == null) {
             return;
         }
         for (Map.Entry<String, List<ReconBill>> entry : infoMap.entrySet()) {
-            String filePath = excelPath + entry.getKey();
+            String filePath = excelPath + excelName + entry.getKey();
             List<ReconBill> data = entry.getValue();
             int total = data.size();
             //总金额
@@ -132,7 +133,7 @@ public class ReconUpload {
                                     .collect(Collectors.toList())
                     );
             try {
-                soleIDs.add(excelGenerator.calcultateContentHash());//TODO 多次生成只用了最后一次
+                soleIDs.add(excelGenerator.calcultateContentHash());//TODO 多次生成只用了最后一次 (已解决)
                 excelGenerator.save(filePath);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -152,7 +153,7 @@ public class ReconUpload {
                 String fileName = zipPath.substring(zipPath.lastIndexOf('/') + 1);
                 SftpUtil.upload(constants.SFTP_HOST, constants.SFTP_PORT, constants.SFTP_USER, constants.SFTP_PASS, constants.SFTP_PATH_321, fileName, input);
                 //成功上传后-通知模块
-                NoticeUtil.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,type, constants.SFTP_PATH_321,fileName);
+                NoticeUtil.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,constants.NOTIC_TYPE_RECON, constants.SFTP_PATH_321,fileName);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException("压缩文件找不到 "+zipPath,e);
             } catch (IOException e) {

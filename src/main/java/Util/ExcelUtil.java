@@ -1,6 +1,7 @@
 package Util;
 
 import cn.hutool.crypto.digest.DigestUtil;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.logging.log4j.LogManager;
@@ -12,7 +13,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestOutputStream;
@@ -31,31 +31,43 @@ public class ExcelUtil {
             log.error("没有数据需要分割");
             return new LinkedHashMap();
         }
-        int divisionSize = (infos.size() + (maxSize - 1)) / maxSize;
+
         LinkedHashMap<String,List<T>> infoMap = new LinkedHashMap<>();
-        //文件从1开始
-        int excelIndex = 1;
-        int j = 0;
 
-        while(j < infos.size()) {
-            List<T> list = new ArrayList<T>();
+        List<List<T>> partitions= ListUtils.partition(infos, maxSize);
 
-            int end = Math.min(infos.size(),j+maxSize);
-            for(; j<end; j++){
-                list.add(infos.get(j));
-            }
-            //取名
-            String excelName = (divisionSize == 1) ? baseName +".xlsx" :  baseName + "_" + String.format("%03d.xlsx",ExcelIndex);//TODO
+        int divisionSize = partitions.size();
+        int index = 1;
 
-            infoMap.put(excelName,list);
+        for (List<T> partition : partitions){
 
-            j = end;
-
-            excelIndex++;
+            String excelName = (divisionSize == 1) ? baseName +".xlsx" :  baseName + "_" + String.format("%03d.xlsx",index);//TODO
+            infoMap.put(excelName,partition);
+            index++;
         }
         return infoMap;
     }
+    public static <T> LinkedHashMap PartitionExcel(List<T> infos, int maxSize){
+        if (infos == null || infos.size() == 0 ) {
+            log.error("没有数据需要分割");
+            return new LinkedHashMap();
+        }
 
+        LinkedHashMap<String,List<T>> infoMap = new LinkedHashMap<>();
+
+        List<List<T>> partitions= ListUtils.partition(infos, maxSize);
+
+        int divisionSize = partitions.size();
+        int index = 1;
+
+        for (List<T> partition : partitions){
+
+            String excelName = "_" + String.format("%03d.xlsx",index);//TODO
+            infoMap.put(excelName,partition);
+            index++;
+        }
+        return infoMap;
+    }
 
     //动态创建Excel
     public static class ExcelGenerator {
