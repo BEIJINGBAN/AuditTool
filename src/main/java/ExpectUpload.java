@@ -11,17 +11,21 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Audit327 {
-    public static void Audit327(int excelSize) throws FileNotFoundException, IOException, NoSuchAlgorithmException {
-        //3.2.7对账单
-        //日期格式
+/*
+3.2.7对账单
+*/
 
+public class ExpectUpload {
+    public static void expectBillUpload(int excelSize) throws FileNotFoundException, IOException, NoSuchAlgorithmException {
+
+
+        //规范日期格式
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        //一个Excel包含的文件数量
+
         //命名数据
-        String billName = "收账单对账数据";//文件类型 Tran\Alloc\BankFlow\TranAuditResult
-        String tranTime = sdf.format(new Date());//当前时间
+        String billName = "收账单对账数据";
+        String tranTime = sdf.format(new Date());
 
         //文件地址
         String zipPath = "./src/";
@@ -38,80 +42,19 @@ public class Audit327 {
         String zipName = billName + "_" + tranTime;
         String soleId = "";
         //生成的Excel
-        List<ExpectBill> info = new ArrayList<ExpectBill>();
+        List<ExpectBill> infos = TestGenerator.expectBillsGenerator();
 
-        //工具类的创建
-        ExcelUtil excel = new ExcelUtil();
-        ZipUtil zip = new ZipUtil();
-        SftpUtil sftp = new SftpUtil();
-        NoticeUtil notice = new NoticeUtil();
-        FtpUtil ftp = new FtpUtil();
-
-        ExpectBill splitPayment = new ExpectBill();
-        splitPayment.setOrgCode("120251010224000");
-        splitPayment.setMerchantNo("12");
-        //120251010224000
-        splitPayment.setMerchantOrderNo("20240522120251010224037001786");
-        splitPayment.setChannelSerialNo("03120241430610345044015");
-        splitPayment.setOriginalBaoRongSerialNo("03120241430610345044015");
-        splitPayment.setBaoRongSerialNo("03120241430610345044015");
-        splitPayment.setChannelName("工行");
-        splitPayment.setTradeDirection("收入");
-        splitPayment.setTradeDate(new Date());
-        splitPayment.setSettleDate(new Date());
-        splitPayment.setSplitMerchantNo("12");
-        splitPayment.setTradeAmount("200.00");
-        splitPayment.setFee("1.20");
-        splitPayment.setPayMethod("银行卡");
-        splitPayment.setTerminalId("120251010224037");
-        splitPayment.setSplitFlag("不分账");
-        splitPayment.setCallbackUrl("http://10.60.45.65:9091/fileUpload/callback");
-
-        //错误信息
-//        splitPayment.setOrgCode("120251010224000");
-//        splitPayment.setMerchantNo("12");
-//        //120251010224000
-//        splitPayment.setMerchantOrderNo("20240522120251010224037001786");
-//        splitPayment.setChannelSerialNo("03120241430610345044015");
-//        splitPayment.setOriginalBaoRongSerialNo("03120241430610345044015");
-//        splitPayment.setBaoRongSerialNo("03120241430610345044015");
-//        splitPayment.setChannelName("工行");
-//        splitPayment.setTradeDirection("收入");
-//        splitPayment.setTradeDate(new Date());
-//        splitPayment.setSettleDate(new Date());
-//        splitPayment.setSplitMerchantNo("12");
-//        splitPayment.setTradeAmount("200.00");
-//        splitPayment.setFee("1.20");
-//        splitPayment.setPayMethod("银行卡");
-//        splitPayment.setTerminalId("120251010224037");
-//        splitPayment.setSplitFlag("不分账");
-//        splitPayment.setCallbackUrl("http://10.60.45.65:9091/fileUpload/callback");
-
-        // 添加到列表
-        info.add(splitPayment);
-
-        for (ExpectBill data : info) {
-            String recordId = data.getRecordId();
+        for (ExpectBill data : infos) {
+            String recordId = ExcelUtil.recordIdGenerate(data, new String[]{data.getRecordId()});
             data.setRecordId(recordId);
         }
-        LinkedHashMap<String, List<ExpectBill>> infoMap = excel.PartitionExcel(info, excelSize,excelName);
+        LinkedHashMap<String, List<ExpectBill>> infoMap = ExcelUtil.PartitionExcel(infos, excelSize,excelName);
         if (infoMap == null) {
             return;
         }
         for (Map.Entry<String, List<ExpectBill>> entry : infoMap.entrySet()) {
             filePath = ExcelPath + entry.getKey();
             List<ExpectBill> data = entry.getValue();
-            //渠道数量
-            Set<String> channelSet = data.stream()
-                    .map(ExpectBill::getChannelName)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-
-            //转为LIST
-            List<String[]> channelName = channelSet.stream()
-                    .map(name -> new String[]{name})
-                    .collect(Collectors.toList());
-
             try {
                 ExcelUtil.ExcelGenerator excelGenerator = ExcelUtil.ExcelGenerator.create()
                         //表一
@@ -238,44 +181,17 @@ public class Audit327 {
                                         new String[]{"易生"}
                                 )
                         );
-                soleId = excelGenerator.calcultateContentHash();
                 excelGenerator.save(filePath);
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
             }
         }
-//        //取绝对路径
-//        File excels = new File(ExcelPath);
-//        String ExcelsPath = excels.getAbsolutePath();
-//       压缩并加密               Tran_企业编号_业务系统标识_交易日期_唯一编号.zip
-//        zipPath = zip.zipEncrypt(ExcelsPath, zipPath, constants.ZIP_PASSWORD, zipName);
-
-////             上传文件（FTP）
-//        try (FileInputStream input = new FileInputStream(new File(zipPath))) {
-//
-//            String fileName = zipPath.substring(zipPath.lastIndexOf('/') + 1);
-//            FtpUtil.upload(constants.FTP_HOST, constants.FTP_PORT, constants.FTP_USER, constants.FTP_PASS, constants.FTP_PATH, fileName, input);
-//            // 成功上传后-通知模块
-//            notice.noticeAudit(constants.BASE_PATH, constants.API_PATH, interfaceVersion, transSeqNo, type, constants.FTP_PATH, zipName);
-//
-//        } catch (FileNotFoundException e) {
-//            throw new RuntimeException("压缩文件找不到 " + zipPath, e);
-//        } catch (IOException e) {
-//            throw new RuntimeException("读取出问题 " + e.getMessage(), e);
-//        } catch (Exception e) {
-//            throw new RuntimeException("FTP出问题 " + e.getMessage(), e);
-//        }
-//        上传文件（SFTP）
-
-        try (
-                FileInputStream input = new FileInputStream(new File(filePath))){
+        try (FileInputStream input = new FileInputStream(new File(filePath))){
 
             String fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-            sftp.upload(constants.SFTP_HOST, constants.SFTP_PORT, constants.SFTP_USER, constants.SFTP_PASS, constants.SFTP_PATH_327, fileName, input);
+            SftpUtil.upload(constants.SFTP_HOST, constants.SFTP_PORT, constants.SFTP_USER, constants.SFTP_PASS, constants.SFTP_PATH_327, fileName, input);
             //成功上传后-通知模块
-            notice.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,type, constants.SFTP_PATH_327,fileName);
+            NoticeUtil.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,type, constants.SFTP_PATH_327,fileName);
         } catch (
                 FileNotFoundException e) {
             throw new RuntimeException("压缩文件找不到 "+zipPath,e);

@@ -104,10 +104,11 @@ public class SftpUtil {
         ChannelSftp sftp = null;
         try{
             sftp = login(host, port, username, password);
-            String directory = filePath.substring(0,filePath.lastIndexOf(File.separator));
+            String directory = filePath.substring(0,filePath.lastIndexOf('/'));
             sftp.cd(directory);
-            String fileName = filePath.substring(filePath.lastIndexOf(File.separator)+1);
+            String fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
             sftp.rm(fileName);
+            log.info("成功删除",fileName);
         }catch (Exception e){
             log.error("删除失败 "+e);
             success = false;
@@ -186,7 +187,7 @@ public class SftpUtil {
     //递归创建文件夹
     public static void mkdir(ChannelSftp sftp,String basePath)throws Exception {
         try {
-            sftp.cd(basePath);
+            sftp.cd(basePath);//TODO
         } catch (SftpException e) {
             List<String> dirs = StrUtil.split(basePath, "/");
             String tempPath = "";

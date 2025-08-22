@@ -30,8 +30,14 @@ public class constants {
     public static final String SFTP_PASS = "JyB9Wm4qNZ";
     public static final String SFTP_PATH_321 = "/data/ftp/data/ftp/data/ftp/zhenongfa/expectdetail/upload";
     public static final String SFTP_PATH_327 = "/data/ftp/data/ftp/data/ftp/zhenongfa/recontransdetail/upload";
+
     //通知地址
     public static final String BASE_PATH = "http://10.60.45.34:8204";
     public static final String API_PATH = "/yqs/openapi/v1/audit/notify/fileUploadNotify";
+
+    public static final String OPERATE_ADD = "ADD";
+    public static final String OPERATE_UPDATE = "UPDATE";
+    public static final String OPERATE_DEL = "DEL";
+    public static final String OPERATE_NOTICE = "NOTICE";
 
 }

@@ -277,10 +277,8 @@ public class FtpUtil {
                     // 目录不存在，尝试创建
                     if (ftpClient.makeDirectory(current.toString())) {
                         log.info("创建目录: " + current);
-//                        System.out.println("创建目录: " + current);
                     } else {
                         log.error("创建目录失败: " + current);
-//                        System.out.println("创建目录失败: " + current);
                     }
                     ftpClient.changeWorkingDirectory(current.toString());
                 }

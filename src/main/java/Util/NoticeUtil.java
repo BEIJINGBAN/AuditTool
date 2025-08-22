@@ -64,7 +64,7 @@ public class NoticeUtil {
         return UUID.randomUUID().toString().replaceAll("-", "").substring(0, 32);
     }
 
-    public static boolean noticeAudit(String BASE_URL, String API_PATH,
+    public static void noticeAudit(String BASE_URL, String API_PATH,
                                       String interfaceVersion, String transSeqNo,
                                       String type, String filePath, String fileName) {
 
@@ -82,7 +82,6 @@ public class NoticeUtil {
         bizContentObj.put("filePath",filePath);
         bizContentObj.put("fileName",fileName);
 
-        //
         try {
             TreeMap<String, Object> paramMap = new TreeMap<>();
             paramMap.put("bizContent", bizContentObj);
@@ -98,10 +97,8 @@ public class NoticeUtil {
             String sign = SignUtil.rsaSign(signContent, constants.PRIVATE_KEY, constants.SIGN_ALGORITHM, constants.CHARSET);
             if (sign == null || sign.trim().isEmpty()) {
                 log.info("签名失败，检查私钥格式");
-                result = false;
             }
             log.info("签名" + sign);
-
 
             Map<String, Object> finalJson = new TreeMap<>();
             finalJson.putAll(paramMap);
@@ -115,24 +112,19 @@ public class NoticeUtil {
                     .post(okhttp3.RequestBody.create(json,MediaType.get(("application/json; charset=utf-8"))))
                     .build();
 
-
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful()) {
                     String responseBody = response.body().string();
                     log.info("通知成功，响应： " + responseBody);
-                    result = true;
                 } else {
                     String errorMsg = response.body() != null ? response.body().string() : "未知错误";
                     log.error("请求失败，状态码： " + response.code() + "；响应： " + errorMsg);
-                    result = false;
                 }
             }
         }catch (IOException e) {
             log.error("请求异常" + e.getMessage());
             e.printStackTrace();
-            result = false;
         }
-        return result;
     }
 }
 

@@ -24,7 +24,7 @@ public class ExcelUtil {
     private static final Logger log = LogManager.getLogger(ExcelUtil.class);
 
     //分割Excel
-    public <T> LinkedHashMap PartitionExcel(List<T> info, int maxSize,String baseName){
+    public static <T> LinkedHashMap PartitionExcel(List<T> info, int maxSize,String baseName){
         if (info == null || info.size() == 0 ) {
             log.error("没有数据需要分割");
             return null;
@@ -46,7 +46,7 @@ public class ExcelUtil {
                 list.add(info.get(j));
             }
             //取名
-            String ExcelName = (divisionSize == 1) ? baseName +".xlsx" :  baseName + "_" + String.format("%03d.xlsx",ExcelIndex);
+            String ExcelName = (divisionSize == 1) ? baseName +".xlsx" :  baseName + "_" + String.format("%03d.xlsx",ExcelIndex);//TODO
 
             InfoMap.put(ExcelName,list);
 

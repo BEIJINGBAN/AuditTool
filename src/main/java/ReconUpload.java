@@ -11,90 +11,60 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Audit321 {
-    public static void Audit321(int excelSize) throws IOException, NoSuchAlgorithmException {
-        //应收账单3.2.1
+/*
+     应收账单上传 3.2.1
+*/
+
+public class ReconUpload {
+    public static void reconBillUpload(int excelSize) throws IOException, NoSuchAlgorithmException {
         //日期格式
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        String soleID = "";
 
-        //命名数据
-        String fileType = "Tran";//文件类型 Tran\Alloc\BankFlow\TranAuditResult
-        String entCode = "ZN330301"; //企业编号
-        String tranTime = sdf.format(new Date());//当前时间
-        String tranType = "转账";//企业收银方式
-        String opCode = "ADD";//操作码 ADD UPDATE DEL NOTICE
-        String businessTag = "CRM";//业务类型
+        //TODO 以下为可修改数据
+        //文件类型 Tran\Alloc\BankFlow\TranAuditResult
+        String fileType = "Tran";
+        String entCode = "ZN330301";
+        String tranTime = sdf.format(new Date());
+        String tranType = "转账";
+        String opCode = constants.OPERATE_ADD;//操作码 ADD UPDATE DEL NOTICE
+        String businessTag = "CRM";
 
-        //文件地址
+        //用户本地保存Excel和Zip文件的路径
         String zipPath = "./src/";
-        String ExcelPath = "./src/main/audit321/";
-
-        //通知信息
-        String interfaceVersion = "1.0";
+        String excelPath = "./src/main/audit321/";
+        //交易流水号
         String transSeqNo = "NoABC";
-        String type = "1";
+
+
+        //TODO 以下数据为系统写死数据
+        //通知信息
+        String interfaceVersion = "1.0";//接口版本
+        String type = "1";//通知类型
 
         //应收上传
         String excelName = fileType + "_" + entCode + "_" + tranTime + "_" + tranType + "_" + opCode;
         String zipName = fileType + "_" + entCode + "_" + businessTag + "_" + tranTime;
+
+        //zip文件的唯一后缀
+        String soleID = "";
+
         //生成的Excel
-        List<ReconBill> info = new ArrayList<ReconBill>();
+        //TODO  测试生成不规范
+        List<ReconBill> infos= TestGenerator.reconBillsGeneretor();
 
-        //工具类的创建
-        ExcelUtil excel = new ExcelUtil();
-        ZipUtil zip = new ZipUtil();
-        SftpUtil sftp = new SftpUtil();
-        NoticeUtil notice = new NoticeUtil();
-        //测试数据
-        ReconBill test1 = new ReconBill();
-        ReconBill test2 = new ReconBill();
-
-        test1.setOrderOrgCode("S112");
-        test1.setAcquiringMerchantNo("11889900");
-        test1.setBizSystemCode("XSC");
-        test1.setReceivableOrderNo("XSC0000001");
-        test1.setMerchantOrderNo("0000000001");
-        test1.setIncomeExpenseFlag("2"); // 收入
-        test1.setAmount("100"); // 100分 = 1元
-        test1.setTradeTime(new Date());
-        test1.setOriginalTradeTime(null); // 可选，非现金上缴可为空
-        test1.setEnterpriseCashieType("转账");
-        test1.setAuditNotifyUrl("http://10.60.45.65:9091/fileUpload/callback");
-        test1.setDeliveryOrderFlag("1"); // 是发货订单
-        test1.setConfirmReceiveTime(new Date());
-        test1.setExtendInfo("{\"extend1\":\"手机\",\"extend2\":\"1\",\"extend3\":\"0.5\",\"extend5\":\"李四\"}");
-
-        test2.setOrderOrgCode("S113");
-        test2.setAcquiringMerchantNo("11889911");
-        test2.setBizSystemCode("HY");
-        test2.setReceivableOrderNo("HY0000001");
-        test2.setMerchantOrderNo("0000000002");
-        test2.setIncomeExpenseFlag("2"); // 收入
-        test2.setAmount("500"); // 100分 = 1元
-        test2.setTradeTime(new Date());
-        test2.setOriginalTradeTime(null); // 可选，非现金上缴可为空
-        test2.setEnterpriseCashieType("转账");
-        test2.setAuditNotifyUrl("http://10.60.45.65:9091/fileUpload/callback");
-        test2.setDeliveryOrderFlag("1"); // 是发货订单
-        test2.setConfirmReceiveTime(new Date()); //TODO 111
-        test2.setExtendInfo("{ \"extend1\": \"商品名称\", \"extend2\": \"购买数量\", \"extend3\": \"运费\", \"extend4\": \"单位金额\", \"extend5\": \"购买人名称\", \"extend6\": \"客户ID\", \"extend20\": \"其他自定义字段，最多支持20个\"}");
-
-        // 添加到列表
-        info.add(test1);
-        info.add(test2);
-        //生成唯一ID
-        for (ReconBill data : info) {
-            String recordId = data.getRecordId();
+        //TODO 唯一值生成不规范
+        for (ReconBill data : infos) {
+            String recordId = ExcelUtil.recordIdGenerate(data, new String[]{data.getRecordId()});
             data.setRecordId(recordId);
         }
-        LinkedHashMap<String, List<ReconBill>> infoMap = excel.PartitionExcel(info,excelSize,excelName);
+        //TODO
+        LinkedHashMap<String, List<ReconBill>> infoMap = ExcelUtil.PartitionExcel(infos,excelSize,excelName);
         if (infoMap == null) {
             return;
         }
         for (Map.Entry<String, List<ReconBill>> entry : infoMap.entrySet()) {
-            String filePath = ExcelPath + entry.getKey();
+            String filePath = excelPath + entry.getKey();
             List<ReconBill> data = entry.getValue();
             int total = data.size();
             //总金额
@@ -156,7 +126,7 @@ public class Audit321 {
                                     .collect(Collectors.toList())
                     );
             try {
-                soleID = excelGenerator.calcultateContentHash();
+                soleID = excelGenerator.calcultateContentHash();//TODO 多次生成只用了最后一次
                 excelGenerator.save(filePath);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -165,33 +135,19 @@ public class Audit321 {
             }
         }
         //取绝对路径
-        File excels = new File(ExcelPath);
-        String ExcelsPath = excels.getAbsolutePath();
-//       压缩并加密               Tran_企业编号_业务系统标识_交易日期_唯一编号.zip
-        zipPath = zip.zipEncrypt(ExcelsPath, zipPath, constants.ZIP_PASSWORD, zipName, soleID);
+        File excels = new File(excelPath);
+        String excelsPath = excels.getAbsolutePath();
+//       压缩并加密
+//       zip文件名模板： Tran_企业编号_业务系统标识_交易日期_唯一编号.zip
+        zipPath = ZipUtil.zipEncrypt(excelsPath, zipPath, constants.ZIP_PASSWORD, zipName, soleID);
 
-//         上传文件（FTP）
-//    try (FileInputStream input = new FileInputStream(new File(zipPath))) {
-//
-//        String fileName = zipPath.substring(zipPath.lastIndexOf('/') + 1);
-//        FtpUtil.upload(FTP_HOST, FTP_PORT, FTP_USER, FTP_PASS, FTP_PATH, fileName, input);
-//        // 成功上传后-通知模块
-//        notice.noticeAudit(BASE_PATH, API_PATH, interfaceVersion, transSeqNo, type, FTP_PATH, zipName);
-//
-//    } catch (FileNotFoundException e) {
-//        throw new RuntimeException("压缩文件找不到 " + zipPath, e);
-//    } catch (IOException e) {
-//        throw new RuntimeException("读取出问题 " + e.getMessage(), e);
-//    } catch (Exception e) {
-//        throw new RuntimeException("FTP出问题 " + e.getMessage(), e);
-//    }
         //上传文件（SFTP）
             try (FileInputStream input = new FileInputStream(new File(zipPath))){
 
                 String fileName = zipPath.substring(zipPath.lastIndexOf('/') + 1);
-                sftp.upload(constants.SFTP_HOST, constants.SFTP_PORT, constants.SFTP_USER, constants.SFTP_PASS, constants.SFTP_PATH_321, fileName, input);
+                SftpUtil.upload(constants.SFTP_HOST, constants.SFTP_PORT, constants.SFTP_USER, constants.SFTP_PASS, constants.SFTP_PATH_321, fileName, input);
                 //成功上传后-通知模块
-                notice.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,type, constants.SFTP_PATH_321,fileName);
+                NoticeUtil.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,type, constants.SFTP_PATH_321,fileName);//TODO
             } catch (FileNotFoundException e) {
                 throw new RuntimeException("压缩文件找不到 "+zipPath,e);
             } catch (IOException e) {
