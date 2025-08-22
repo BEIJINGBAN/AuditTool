@@ -2,6 +2,7 @@ package Util;
 
 import cn.hutool.crypto.digest.DigestUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -13,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -27,18 +29,15 @@ public class ExcelUtil {
     public static <T> LinkedHashMap PartitionExcel(List<T> info, int maxSize,String baseName){
         if (info == null || info.size() == 0 ) {
             log.error("没有数据需要分割");
-            return null;
+            return new LinkedHashMap();
         }
         int divisionSize = (info.size() + (maxSize - 1)) / maxSize;
-
         LinkedHashMap<String,List<T>> InfoMap = new LinkedHashMap<>();
         //文件从1开始
         int ExcelIndex = 1;
         int j = 0;
 
-
         while(j < info.size()) {
-
             List<T> list = new ArrayList<T>();
 
             int end = Math.min(info.size(),j+maxSize);
@@ -127,32 +126,24 @@ public class ExcelUtil {
         public String calcultateContentHash() throws IOException, NoSuchAlgorithmException {
 
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            try(OutputStream outputStream = new DigestOutputStream(new OutputStream() {
-                @Override
-                public void write(int b) throws IOException {
-                }
-                @Override
-                public void write(byte[] b,int off,int len) throws IOException {}
-            },messageDigest)){
-
-                final byte[] delimiter = "|".getBytes();
-
+            try(DigestOutputStream dos = new DigestOutputStream(new ByteArrayOutputStream(), messageDigest)){
+                final byte[] delimiter = "|".getBytes(StandardCharsets.UTF_8);
                 for (SheetConfig sheet : sheets){
-                    outputStream.write(sheet.sheetName.getBytes());
-                    outputStream.write(delimiter);
+                    dos.write(sheet.sheetName.getBytes(StandardCharsets.UTF_8));
+                    dos.write(delimiter);
 
                     for (String[] header : sheet.headerRows){
                         for (String cellValue : header){
-                            outputStream.write(cellValue.getBytes());
-                            outputStream.write(delimiter);
+                            dos.write(cellValue.getBytes(StandardCharsets.UTF_8));
+                            dos.write(delimiter);
                         }
 
                     }
                     for (String[] rowData : sheet.data){
                         for (String cellValue : rowData){
                             if (cellValue != null) {
-                                outputStream.write(cellValue.getBytes());
-                                outputStream.write(delimiter);
+                                dos.write(cellValue.getBytes(StandardCharsets.UTF_8));
+                                dos.write(delimiter);
                             }
                         }
                     }

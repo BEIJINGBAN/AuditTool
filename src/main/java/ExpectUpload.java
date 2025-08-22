@@ -24,7 +24,8 @@ public class ExpectUpload {
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
-        //命名数据
+        //TODO 以下数据根据具体生产信息输入
+        //文件命名数据
         String billName = "收账单对账数据";
         String tranTime = sdf.format(new Date());
 
@@ -37,21 +38,25 @@ public class ExpectUpload {
         String transSeqNo = "NoABC";
         String type = "2";
 
+        //TODO 以下为生成的Excel测试数据，实际生产请用真实数据代替
+        List<ExpectBill> infos = TestGenerator.expectBillsGenerator();
+
+        //TODO 以下为系统功能逻辑
         //应收上传
         String filePath = "";
         String excelName = billName + "_" + tranTime;
         String zipName = billName + "_" + tranTime;
         String soleId = "";
-        //TODO 以下为生成的Excel测试数据，实际生产请用真实数据代替
-        List<ExpectBill> infos = TestGenerator.expectBillsGenerator();
 
+        List<String> soleIDs = new ArrayList<>();
         //生成回溯ID忽略的字段
         String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};
-        //TODO 唯一值生成不规范
+        //TODO 唯一值生成不规范 (已解决）
         for (ExpectBill data : infos) {
             String recordId = ExcelUtil.recordIdGenerate(data, ignoreFiellds);
             data.setRecordId(recordId);
         }
+        //TODO 空指针 (已解决)
         LinkedHashMap<String, List<ExpectBill>> infoMap = ExcelUtil.PartitionExcel(infos, excelSize,excelName);
         if (infoMap == null) {
             return;

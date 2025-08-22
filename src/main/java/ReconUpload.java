@@ -21,8 +21,8 @@ public class ReconUpload {
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
-        //TODO 以下数据根据具体
-        //文件类型 Tran\Alloc\BankFlow\TranAuditResult
+        //TODO 以下数据根据具体生产信息输入
+        //上送文件命名
         String fileType = "Tran";
         String entCode = "ZN330301";
         String tranTime = sdf.format(new Date());
@@ -30,36 +30,35 @@ public class ReconUpload {
         String opCode = constants.OPERATE_ADD;//操作码 ADD UPDATE DEL NOTICE
         String businessTag = "CRM";
 
-        //用户本地保存Excel和Zip文件的路径
+        //本地保存Excel文件和Zip文件的路径
         String zipPath = "./src/";
         String excelPath = "./src/main/audit321/";
-        //交易流水号
+
+        // 通知信息
         String transSeqNo = "NoABC";
-
-
-        //TODO 以下数据为系统写死数据
-        //通知信息
         String interfaceVersion = "1.0";//接口版本
         String type = "1";//通知类型
 
-        //应收上传
-        String excelName = fileType + "_" + entCode + "_" + tranTime + "_" + tranType + "_" + opCode;
-        String zipName = fileType + "_" + entCode + "_" + businessTag + "_" + tranTime;
-
-        //zip文件的唯一后缀
-        String soleID = "";
-
         //生成的Excel
-        //TODO  测试生成不规范
+        //TODO  测试生成不规范 (已解决)
         List<ReconBill> infos= TestGenerator.reconBillsGeneretor();
 
+        //TODO 以下为系统功能逻辑
+        //名字组装
+        String excelName = fileType + "_" + entCode + "_" + tranTime + "_" + tranType + "_" + opCode;
+        String zipName = fileType + "_" + entCode + "_" + businessTag + "_" + tranTime;
+        //zip文件的唯一后缀
+        String zipSoleID = "";
+        //收集每个Excel文件的soleID
+        List<String> soleIDs = new ArrayList<>();
+
         String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};
-        //TODO 唯一值生成不规范
+        //TODO 唯一值生成不规范 (已解决)
         for (ReconBill data : infos) {
             String recordId = ExcelUtil.recordIdGenerate(data, ignoreFiellds);
             data.setRecordId(recordId);
         }
-        //TODO
+        //TODO 空指针 (已解决)
         LinkedHashMap<String, List<ReconBill>> infoMap = ExcelUtil.PartitionExcel(infos,excelSize,excelName);
         if (infoMap == null) {
             return;
@@ -110,8 +109,10 @@ public class ReconUpload {
                                             d.getChannelSerialNo(),
                                             d.getIncomeExpenseFlag(),
                                             d.getAmount(),
-                                            (d.getTradeTime() != null ? sdt.format(d.getTradeTime()) : null),
-                                            (d.getOriginalTradeTime() != null ? sdt.format(d.getOriginalTradeTime()) : null),
+                                            ("666"),
+//                                            (d.getTradeTime() != null ? sdt.format(d.getTradeTime()) : null),
+                                            ("666"),
+//                                            (d.getOriginalTradeTime() != null ? sdt.format(d.getOriginalTradeTime()) : null),
                                             d.getEnterpriseCashieType(),
                                             d.getRemark(),
                                             d.getCounterpartyName(),
@@ -120,13 +121,14 @@ public class ReconUpload {
                                             d.getPurpose(),
                                             d.getAuditNotifyUrl(),
                                             d.getDeliveryOrderFlag(),
-                                            (d.getConfirmReceiveTime() != null ? sdt.format(d.getConfirmReceiveTime()) : null),
+                                            ("666"),
+//                                            (d.getConfirmReceiveTime() != null ? sdt.format(d.getConfirmReceiveTime()) : null),
                                             d.getExtendInfo(),
                                             d.getRecordId()})
                                     .collect(Collectors.toList())
                     );
             try {
-                soleID = excelGenerator.calcultateContentHash();//TODO 多次生成只用了最后一次
+                soleIDs.add(excelGenerator.calcultateContentHash());//TODO 多次生成只用了最后一次
                 excelGenerator.save(filePath);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -134,12 +136,13 @@ public class ReconUpload {
                 throw new RuntimeException(e);
             }
         }
+        zipSoleID =ZipUtil.zipHash(soleIDs);
         //取绝对路径
         File excels = new File(excelPath);
         String excelsPath = excels.getAbsolutePath();
         //压缩加密
         //zip文件名模板： Tran_企业编号_业务系统标识_交易日期_唯一编号.zip
-        zipPath = ZipUtil.zipEncrypt(excelsPath, zipPath, constants.ZIP_PASSWORD, zipName, soleID);
+        zipPath = ZipUtil.zipEncrypt(excelsPath, zipPath, constants.ZIP_PASSWORD, zipName, zipSoleID);
         //上传文件（SFTP）
             try (FileInputStream input = new FileInputStream(new File(zipPath))){
                 String fileName = zipPath.substring(zipPath.lastIndexOf('/') + 1);

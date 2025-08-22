@@ -187,7 +187,7 @@ public class SftpUtil {
     //递归创建文件夹
     public static void mkdir(ChannelSftp sftp,String basePath)throws Exception {
         try {
-            sftp.cd(basePath);//TODO
+            sftp.;//TODO
         } catch (SftpException e) {
             List<String> dirs = StrUtil.split(basePath, "/");
             String tempPath = "";

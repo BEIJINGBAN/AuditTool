@@ -24,42 +24,6 @@ public class NoticeUtil {
 
     private static final com.fasterxml.jackson.databind.ObjectMapper mapper = new ObjectMapper();
 
-    //Json格式
-    public static class BizContent {
-        public String interfaceVersion;
-        public String transSeqNo;
-        public String type;
-        public String filePath;
-        public String fileName;
-
-        public BizContent(String interfaceVersion, String transSeqNo,
-                          String type, String filePath, String fileName){
-            this.interfaceVersion=interfaceVersion;
-            this.transSeqNo=transSeqNo;
-            this.type=type;
-            this.filePath = filePath;
-            this.fileName = fileName;
-        }
-    }
-
-    public static class RequestBody{
-        public String mchId;
-        public String version;
-        public String signType;
-        public String nonceStr;
-        public String uniqueNo;
-        public String bizContent;
-
-        public RequestBody(String mchId, String version, String signType, String nonceStr, String uniqueNo, String bizContent) {
-            this.mchId = mchId;
-            this.version = version;
-            this.signType = signType;
-            this.nonceStr = nonceStr;
-            this.uniqueNo = uniqueNo;
-            this.bizContent = bizContent;
-        }
-    }
-
     private static String generateNonceStr() {
         return UUID.randomUUID().toString().replaceAll("-", "").substring(0, 32);
     }
@@ -67,10 +31,6 @@ public class NoticeUtil {
     public static void noticeAudit(String BASE_URL, String API_PATH,
                                       String interfaceVersion, String transSeqNo,
                                       String type, String filePath, String fileName) {
-
-
-        boolean result = false;
-
         //随机计算
         String nonceStr = generateNonceStr();
         String uniqueNo = generateNonceStr();
