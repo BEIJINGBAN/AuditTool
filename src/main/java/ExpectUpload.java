@@ -36,29 +36,18 @@ public class ExpectUpload {
         //交易流水号
         String transSeqNo = "NoABC";
 
-        //生成Excel每一行 回溯ID时忽略的字段
-        String[] ignoreFiellds ={"tradeTime", "confirmReceiveTime","recordId"};//TODO
         // String[] ignoreFiellds ={"recordId"};//TODO 实际生产中根据需要忽略字段
 
-        //TODO 以下为生成的Excel测试数据，实际生产请用真实数据代替
         List<ExpectBill> infos = TestGenerator.expectBillsGenerator();
 
         //TODO 以下为系统功能逻辑
-
-        //对应应收账单的接口序号
-
         //应收上传
         String filePath = "";
         String excelName = billName + "_" + tranTime;
 
-        //TODO 唯一值生成不规范 (已解决）
-        for (ExpectBill data : infos) {
-            String recordId = ExcelUtil.recordIdGenerate(data, ignoreFiellds);
-            data.setRecordId(recordId);
-        }
         //TODO 空指针 (已解决)
         LinkedHashMap<String, List<ExpectBill>> infoMap = ExcelUtil.PartitionExcel(infos, constants.EXCEL_SIZE,excelName);
-        if (infoMap == null) {
+        if (infoMap.isEmpty()) {
             return;
         }
         for (Map.Entry<String, List<ExpectBill>> entry : infoMap.entrySet()) {
@@ -202,7 +191,7 @@ public class ExpectUpload {
             String fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
             SftpUtil.upload(constants.SFTP_HOST, constants.SFTP_PORT, constants.SFTP_USER, constants.SFTP_PASS, constants.SFTP_PATH_327, fileName, input);
             //成功上传后-通知模块
-            NoticeUtil.noticeAudit(constants.BASE_PATH, constants.API_PATH,interfaceVersion,transSeqNo,constants.NOTIC_TYPE_EXPECT, constants.SFTP_PATH_327,fileName);
+            NoticeUtil.noticeAudit(interfaceVersion,transSeqNo,constants.NOTIC_TYPE_EXPECT, constants.SFTP_PATH_327,fileName);
         } catch (
                 FileNotFoundException e) {
             throw new RuntimeException("压缩文件找不到 "+zipPath,e);

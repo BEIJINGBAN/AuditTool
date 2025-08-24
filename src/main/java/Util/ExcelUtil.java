@@ -178,38 +178,6 @@ public class ExcelUtil {
             this.data = data;
         }
     }
-    public static String recordIdGenerate(Object obj,String[] ignoreFiellds){
-        if (obj == null) {
-            return null;
-        }
-        List<String> ignoreList = Arrays.asList(ignoreFiellds);
-        StringBuilder contetBuilder = new StringBuilder();
-        try{
-            Field[] fields = obj.getClass().getDeclaredFields();
-            Arrays.sort(fields,Comparator.comparing(Field::getName));
-            for (Field field : fields){
-                if (ignoreList.contains(field.getName())){
-                    continue;
-                }
-                field.setAccessible(true);
-                Object value = field.get(obj);
-                contetBuilder.append(field.getName())
-                        .append("=")
-                        .append(value)
-                        .append("|");
-
-            }
-        }catch (IllegalArgumentException e){
-            log.error("生成唯一ID失败 "+e.getMessage());
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        String content = contetBuilder.toString();
-        if (content.isEmpty()){
-            return null;
-        }
-        return DigestUtil.sha256Hex(content);
-    }
 }
 
 
